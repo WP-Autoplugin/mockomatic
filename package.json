@@ -1,0 +1,21 @@
+{
+  "name": "mockomatic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build tooling for the Mockomatic WordPress plugin admin UI.",
+  "scripts": {
+    "start": "wp-scripts start src/admin/generate/index.jsx --output-path=assets/admin/js --output-filename=mockomatic-generate.js",
+    "build": "wp-scripts build src/admin/generate/index.jsx --output-path=assets/admin/js --output-filename=mockomatic-generate.js"
+  },
+  "dependencies": {
+    "@wordpress/components": "^30.9.0",
+    "@wordpress/element": "^6.36.0",
+    "@wordpress/i18n": "^6.9.0"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^31.1.0"
+  },
+  "browserslist": [
+    "extends @wordpress/browserslist-config"
+  ]
+}
