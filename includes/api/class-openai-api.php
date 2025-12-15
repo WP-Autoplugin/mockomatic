@@ -60,13 +60,31 @@ class OpenAI_API extends API {
 		$this->model = sanitize_text_field( $model );
 
 		$params = [
-			'gpt-4o'            => [ 'temperature' => 0.7, 'max_tokens' => 4096 ],
-			'chatgpt-4o-latest' => [ 'temperature' => 0.7, 'max_tokens' => 16384 ],
-			'gpt-4o-mini'       => [ 'temperature' => 0.7, 'max_tokens' => 4096 ],
+			'gpt-4o'            => [
+				'temperature' => 0.7,
+				'max_tokens'  => 4096,
+			],
+			'chatgpt-4o-latest' => [
+				'temperature' => 0.7,
+				'max_tokens'  => 16384,
+			],
+			'gpt-4o-mini'       => [
+				'temperature' => 0.7,
+				'max_tokens'  => 4096,
+			],
 			// GPT-5 series uses max_completion_tokens.
-			'gpt-5'             => [ 'temperature' => 1.0, 'max_completion_tokens' => 128000 ],
-			'gpt-5-mini'        => [ 'temperature' => 1.0, 'max_completion_tokens' => 128000 ],
-			'gpt-5-nano'        => [ 'temperature' => 1.0, 'max_completion_tokens' => 128000 ],
+			'gpt-5'             => [
+				'temperature'           => 1.0,
+				'max_completion_tokens' => 128000,
+			],
+			'gpt-5-mini'        => [
+				'temperature'           => 1.0,
+				'max_completion_tokens' => 128000,
+			],
+			'gpt-5-nano'        => [
+				'temperature'           => 1.0,
+				'max_completion_tokens' => 128000,
+			],
 		];
 
 		if ( isset( $params[ $this->model ] ) ) {

@@ -41,18 +41,24 @@ class Generator {
 				'callback'            => [ $this, 'rest_generate_titles' ],
 				'permission_callback' => [ $this, 'can_generate' ],
 				'args'                => [
-					'posts'        => [ 'type' => 'integer', 'default' => 0 ],
-					'pages'        => [ 'type' => 'integer', 'default' => 0 ],
+					'posts'           => [
+						'type'    => 'integer',
+						'default' => 0,
+					],
+					'pages'           => [
+						'type'    => 'integer',
+						'default' => 0,
+					],
 					'generate_images' => [
 						'type'    => 'boolean',
 						'default' => true,
 					],
-					'instructions' => [
+					'instructions'    => [
 						'type'              => 'string',
 						'required'          => false,
 						'sanitize_callback' => 'sanitize_textarea_field',
 					],
-					'model'        => [
+					'model'           => [
 						'type'              => 'string',
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_text_field',
@@ -69,40 +75,40 @@ class Generator {
 				'callback'            => [ $this, 'rest_generate_post' ],
 				'permission_callback' => [ $this, 'can_generate' ],
 				'args'                => [
-					'title'        => [
+					'title'                    => [
 						'type'              => 'string',
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_text_field',
 					],
-					'post_type'    => [
+					'post_type'                => [
 						'type'              => 'string',
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_text_field',
 					],
-					'instructions' => [
+					'instructions'             => [
 						'type'              => 'string',
 						'required'          => false,
 						'sanitize_callback' => 'sanitize_textarea_field',
 					],
-					'model'        => [
+					'model'                    => [
 						'type'              => 'string',
 						'required'          => true,
 						'sanitize_callback' => 'sanitize_text_field',
 					],
-					'generate_image' => [
+					'generate_image'           => [
 						'type'    => 'boolean',
 						'default' => false,
 					],
-					'image_model' => [
+					'image_model'              => [
 						'type'              => 'string',
 						'required'          => false,
 						'sanitize_callback' => 'sanitize_text_field',
 					],
-					'categories' => [
+					'categories'               => [
 						'type'     => 'array',
 						'required' => false,
 					],
-					'tags'       => [
+					'tags'                     => [
 						'type'     => 'array',
 						'required' => false,
 					],
@@ -127,11 +133,11 @@ class Generator {
 						'type'     => 'array',
 						'required' => true,
 					],
-					'categories'  => [
+					'categories'   => [
 						'type'    => 'boolean',
 						'default' => false,
 					],
-					'tags'        => [
+					'tags'         => [
 						'type'    => 'boolean',
 						'default' => false,
 					],
@@ -272,7 +278,7 @@ class Generator {
 		} else {
 			$base .= "\n";
 		}
-		$base .= "Return ONLY valid JSON, without markdown code fences or commentary.";
+		$base .= 'Return ONLY valid JSON, without markdown code fences or commentary.';
 
 		/**
 		 * Filter the titles prompt before it is sent to the text model.
@@ -306,7 +312,7 @@ class Generator {
 			$instructions = 'Use clear, natural English and make it look like a realistic website.';
 		}
 
-		$base = "You are generating dummy content for a WordPress {$post_type} titled: \"{$title}\".\n\n";
+		$base  = "You are generating dummy content for a WordPress {$post_type} titled: \"{$title}\".\n\n";
 		$base .= "User instructions for the overall site: {$instructions}\n\n";
 
 		if ( $is_page ) {
@@ -330,7 +336,7 @@ class Generator {
 		$base .= "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Section Title</h2>\n<!-- /wp:heading -->\n\n";
 		$base .= "<!-- wp:paragraph -->\n<p>This is a paragraph with <strong>bold text</strong> and <em>italic text</em>.</p>\n<!-- /wp:paragraph -->\n\n";
 		$base .= "<!-- wp:list -->\n<ul class=\"wp-block-list\"><!-- wp:list-item -->\n<li>First item</li>\n<!-- /wp:list-item -->\n\n<!-- wp:list-item -->\n<li>Second item</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n";
-		$base .= "Return ONLY the Gutenberg block markup, without JSON wrappers, markdown code fences, or explanations.";
+		$base .= 'Return ONLY the Gutenberg block markup, without JSON wrappers, markdown code fences, or explanations.';
 
 		/**
 		 * Filter the post/page content prompt before it is sent to the text model.
@@ -387,7 +393,7 @@ class Generator {
 		if ( $create_categories ) {
 			$prompt .= "  \"categories\": [\n";
 			$prompt .= "    {\"name\": \"...\", \"slug\": \"...\", \"description\": \"...\", \"posts\": [\"Post title 1\", \"Post title 2\"]}\n";
-			$prompt .= "  ]";
+			$prompt .= '  ]';
 			if ( $create_tags ) {
 				$prompt .= ",\n";
 			} else {
@@ -404,7 +410,7 @@ class Generator {
 		$prompt .= "- Every title can belong to multiple tags, but usually 1–3 categories total across all posts.\n";
 		$prompt .= "- Use URL-friendly slugs (lowercase, hyphens, no special characters).\n";
 		$prompt .= "- Descriptions are short (1–2 sentences) and optional.\n\n";
-		$prompt .= "Return ONLY valid JSON without markdown code fences or commentary.";
+		$prompt .= 'Return ONLY valid JSON without markdown code fences or commentary.';
 
 		/**
 		 * Filter the taxonomy prompt before it is sent to the text model.
@@ -465,9 +471,9 @@ class Generator {
 		foreach ( $items as $item ) {
 			if ( is_string( $item ) ) {
 				$out[] = [
-					'title'                   => $item,
-					'categories'              => [],
-					'tags'                    => [],
+					'title'                    => $item,
+					'categories'               => [],
+					'tags'                     => [],
 					'illustration_description' => $include_illustrations ? '' : '',
 				];
 				continue;
@@ -482,9 +488,9 @@ class Generator {
 			$illust     = ( $include_illustrations && isset( $item['illustration_description'] ) ) ? sanitize_textarea_field( $item['illustration_description'] ) : '';
 
 			$out[] = [
-				'title'                   => (string) $item['title'],
-				'categories'              => $categories,
-				'tags'                    => $tags,
+				'title'                    => (string) $item['title'],
+				'categories'               => $categories,
+				'tags'                     => $tags,
 				'illustration_description' => $illust,
 			];
 		}
@@ -882,7 +888,7 @@ class Generator {
 					);
 					if ( ! is_wp_error( $insert ) && isset( $insert['term_id'] ) ) {
 						$term_id = (int) $insert['term_id'];
-						$summary['categories_created']++;
+						++$summary['categories_created'];
 					}
 				} else {
 					$term_id = (int) $term['term_id'];
@@ -930,7 +936,7 @@ class Generator {
 					);
 					if ( ! is_wp_error( $insert ) && isset( $insert['term_id'] ) ) {
 						$term_id = (int) $insert['term_id'];
-						$summary['tags_created']++;
+						++$summary['tags_created'];
 					}
 				} else {
 					$term_id = (int) $term['term_id'];
