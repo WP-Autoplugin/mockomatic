@@ -114,6 +114,11 @@ Yes. Use the “Stop generating” button; completed items stay in WordPress, an
 
 == Changelog ==
 
+= 0.1.1 =
+* Changed admin menu structure
+* Implemented polling mechanism for long-running Replicate image generation tasks
+* PHPCS fixes and code improvements
+
 = 0.1.0 =  
 * Initial release with AI-generated posts/pages, taxonomy creation, Gutenberg block output, and optional featured images via Replicate.
 
