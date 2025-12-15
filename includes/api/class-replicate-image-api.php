@@ -17,6 +17,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Replicate_Image_API extends API {
 
 	/**
+	 * Poll interval in seconds when waiting on async predictions.
+	 *
+	 * @var int
+	 */
+	protected $poll_interval = 2;
+
+	/**
+	 * Maximum additional poll duration in seconds.
+	 *
+	 * @var int
+	 */
+	protected $poll_timeout = 60;
+
+	/**
 	 * Model slug.
 	 *
 	 * @var string
@@ -79,9 +93,8 @@ class Replicate_Image_API extends API {
 		$response = $this->request(
 			$url,
 			[
-				// Todo: implement polling for long-running requests.
-				// 60 second is the maximum wait time for Replicate, then it returns a 202 and we would need to poll.
-				'timeout' => 60,
+				// Replicate synchronous wait limit is 60 seconds.
+				'timeout' => 65,
 				'headers' => $headers,
 				'body'    => wp_json_encode( $body ),
 			]
@@ -93,6 +106,10 @@ class Replicate_Image_API extends API {
 
 		$data = json_decode( wp_remote_retrieve_body( $response ), true );
 		$code = (int) wp_remote_retrieve_response_code( $response );
+
+		if ( ! is_array( $data ) ) {
+			return new \WP_Error( 'replicate_api_error', __( 'Invalid response from the Replicate API.', 'mockomatic' ) );
+		}
 
 		if ( $code >= 400 ) {
 			return new \WP_Error(
@@ -108,8 +125,18 @@ class Replicate_Image_API extends API {
 			);
 		}
 
+		if ( $this->should_poll_status( isset( $data['status'] ) ? $data['status'] : '' ) && empty( $data['output'] ) ) {
+			$data = $this->poll_prediction( $data, $response, $headers );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+		}
+
 		$output = isset( $data['output'] ) ? $data['output'] : '';
 		if ( empty( $output ) ) {
+			if ( $this->should_poll_status( isset( $data['status'] ) ? $data['status'] : '' ) ) {
+				return new \WP_Error( 'replicate_timeout', __( 'Replicate prediction did not finish in time.', 'mockomatic' ) );
+			}
 			return new \WP_Error( 'replicate_no_output', __( 'Replicate API returned no output.', 'mockomatic' ) );
 		}
 
@@ -134,6 +161,105 @@ class Replicate_Image_API extends API {
 		}
 
 		return wp_remote_retrieve_body( $image_response );
+	}
+
+	/**
+	 * Determine if a prediction status warrants polling.
+	 *
+	 * @param mixed $status Status string.
+	 *
+	 * @return bool
+	 */
+	protected function should_poll_status( $status ) {
+		if ( ! is_string( $status ) || '' === $status ) {
+			return false;
+		}
+		$status = strtolower( $status );
+		return in_array( $status, [ 'starting', 'processing' ], true );
+	}
+
+	/**
+	 * Poll a pending prediction until completion or timeout.
+	 *
+	 * @param array $data     Initial prediction payload.
+	 * @param array $response Initial HTTP response.
+	 * @param array $headers  Request headers.
+	 *
+	 * @return array|\WP_Error
+	 */
+	protected function poll_prediction( $data, $response, $headers ) {
+		$poll_url = '';
+		if ( isset( $data['urls']['get'] ) && is_string( $data['urls']['get'] ) ) {
+			$poll_url = $data['urls']['get'];
+		}
+		if ( '' === $poll_url ) {
+			$location = wp_remote_retrieve_header( $response, 'location' );
+			if ( is_string( $location ) && '' !== $location ) {
+				$poll_url = $location;
+			}
+		}
+		if ( '' === $poll_url ) {
+			return $data;
+		}
+
+		$poll_interval = (int) apply_filters( 'mockomatic_replicate_poll_interval', $this->poll_interval, $data );
+		$poll_timeout  = (int) apply_filters( 'mockomatic_replicate_poll_timeout', $this->poll_timeout, $data );
+
+		$poll_interval = max( 1, $poll_interval );
+		$poll_timeout  = max( 1, $poll_timeout );
+		$deadline      = time() + $poll_timeout;
+		$attempt       = 0;
+
+		while ( $this->should_poll_status( isset( $data['status'] ) ? $data['status'] : '' ) && time() < $deadline ) {
+			++$attempt;
+
+			$poll_response = $this->request(
+				$poll_url,
+				[
+					'method'  => 'GET',
+					'timeout' => 30,
+					'headers' => $headers,
+				]
+			);
+
+			if ( is_wp_error( $poll_response ) ) {
+				return $poll_response;
+			}
+
+			$poll_data = json_decode( wp_remote_retrieve_body( $poll_response ), true );
+			$poll_code = (int) wp_remote_retrieve_response_code( $poll_response );
+
+			if ( $poll_code >= 400 ) {
+				return new \WP_Error(
+					'replicate_api_error',
+					$this->build_api_error_message( is_array( $poll_data ) ? $poll_data : null, $poll_code, $poll_response )
+				);
+			}
+
+			if ( ! is_array( $poll_data ) ) {
+				return new \WP_Error( 'replicate_api_error', __( 'Invalid response from the Replicate API while polling.', 'mockomatic' ) );
+			}
+
+			if ( isset( $poll_data['error'] ) && $poll_data['error'] ) {
+				return new \WP_Error(
+					'replicate_api_error',
+					$this->build_api_error_message( $poll_data, $poll_code, $poll_response )
+				);
+			}
+
+			$data = $poll_data;
+			if ( ! empty( $data['output'] ) ) {
+				return $data;
+			}
+
+			if ( ! $this->should_poll_status( isset( $data['status'] ) ? $data['status'] : '' ) ) {
+				break;
+			}
+
+			sleep( $poll_interval );
+		}
+
+		return $data;
 	}
 
 	/**

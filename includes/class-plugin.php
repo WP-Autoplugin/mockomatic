@@ -37,8 +37,29 @@ class Plugin {
 		// Load textdomain.
 		add_action( 'plugins_loaded', [ __CLASS__, 'load_textdomain' ] );
 
+		add_filter( 'plugin_action_links_' . MOCKOMATIC_BASENAME, [ __CLASS__, 'add_plugin_action_links' ] );
+
 		// Bootstrap after plugins_loaded so constants are defined.
 		add_action( 'init', [ __CLASS__, 'bootstrap' ], 5 );
+	}
+
+	/**
+	 * Add plugin action links.
+	 *
+	 * @param string[] $links Action links.
+	 *
+	 * @return string[]
+	 */
+	public static function add_plugin_action_links( $links ) {
+		$generate_url = admin_url( 'tools.php?page=mockomatic-generate' );
+		$settings_url = admin_url( 'options-general.php?page=mockomatic-settings' );
+
+		$mockomatic_links = [
+			'<a href="' . esc_url( $generate_url ) . '">' . esc_html__( 'Generate', 'mockomatic' ) . '</a>',
+			'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'mockomatic' ) . '</a>',
+		];
+
+		return array_merge( $mockomatic_links, $links );
 	}
 
 	/**

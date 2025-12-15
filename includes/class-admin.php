@@ -43,34 +43,20 @@ class Admin {
 	 * Register admin menus.
 	 */
 	public function register_menus() {
-		$capability = 'manage_options';
-
-		add_menu_page(
+		add_options_page(
 			__( 'Mockomatic', 'mockomatic' ),
 			__( 'Mockomatic', 'mockomatic' ),
-			$capability,
-			'mockomatic-generate',
-			[ $this, 'render_generate_page' ],
-			'data:image/svg+xml;base64,' . base64_encode( '<svg width="24" height="24" fill="currentColor" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><path d="M 500 100C 500 100 500 100 500 100C 541 100 575 134 575 175C 575 207 554 235 525 246C 525 246 525 300 525 300C 525 300 650 300 650 300C 738 300 811 365 823 450C 823 450 825 450 825 450C 866 450 900 484 900 525C 900 525 900 625 900 625C 900 666 866 700 825 700C 825 700 823 700 823 700C 811 785 738 850 650 850C 650 850 350 850 350 850C 262 850 189 785 177 700C 177 700 175 700 175 700C 134 700 100 666 100 625C 100 625 100 525 100 525C 100 484 134 450 175 450C 175 450 177 450 177 450C 189 365 262 300 350 300C 350 300 475 300 475 300C 475 300 475 246 475 246C 446 235 425 207 425 175C 425 134 459 100 500 100M 500 150C 500 150 500 150 500 150C 486 150 475 161 475 175C 475 188 484 198 497 200C 498 200 499 200 500 200C 501 200 502 200 503 200C 516 198 525 188 525 175C 525 161 514 150 500 150M 350 350C 350 350 350 350 350 350C 280 350 225 405 225 475C 225 475 225 675 225 675C 225 745 280 800 350 800C 350 800 650 800 650 800C 720 800 775 745 775 675C 775 675 775 475 775 475C 775 405 720 350 650 350C 650 350 504 350 504 350C 501 350 499 350 496 350C 496 350 350 350 350 350M 352 400C 352 400 352 400 352 400C 407 400 452 445 452 500C 452 555 407 600 352 600C 297 600 252 555 252 500C 252 445 297 400 352 400M 650 400C 650 400 650 400 650 400C 705 400 750 445 750 500C 750 555 705 600 650 600C 595 600 550 555 550 500C 550 445 595 400 650 400M 352 450C 352 450 352 450 352 450C 325 450 302 472 302 500C 302 528 325 550 352 550C 380 550 402 528 402 500C 402 472 380 450 352 450M 650 450C 650 450 650 450 650 450C 622 450 600 472 600 500C 600 528 622 550 650 550C 678 550 700 528 700 500C 700 472 678 450 650 450M 175 500C 175 500 175 500 175 500C 161 500 150 511 150 525C 150 525 150 625 150 625C 150 639 161 650 175 650C 175 650 175 500 175 500M 825 500C 825 500 825 650 825 650C 839 650 850 639 850 625C 850 625 850 525 850 525C 850 511 839 500 825 500M 425 675C 425 675 575 675 575 675C 584 675 592 680 597 687C 601 695 601 705 597 713C 592 720 584 725 575 725C 575 725 425 725 425 725C 416 725 408 720 403 713C 399 705 399 695 403 687C 408 680 416 675 425 675"/></svg>' ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Used only to embed an SVG menu icon.
-			58
-		);
-
-		add_submenu_page(
-			'mockomatic-generate',
-			__( 'Generate Content', 'mockomatic' ),
-			__( 'Generate Content', 'mockomatic' ),
-			$capability,
-			'mockomatic-generate',
-			[ $this, 'render_generate_page' ]
-		);
-
-		add_submenu_page(
-			'mockomatic-generate',
-			__( 'Settings', 'mockomatic' ),
-			__( 'Settings', 'mockomatic' ),
-			$capability,
+			'manage_options',
 			'mockomatic-settings',
 			[ $this, 'render_settings_page' ]
+		);
+
+		add_management_page(
+			__( 'Mockomatic', 'mockomatic' ),
+			__( 'Mockomatic', 'mockomatic' ),
+			'edit_posts',
+			'mockomatic-generate',
+			[ $this, 'render_generate_page' ]
 		);
 	}
 
@@ -269,9 +255,13 @@ class Admin {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'mockomatic' ) );
 		}
+		$generate_url = admin_url( 'tools.php?page=mockomatic-generate' );
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Mockomatic Settings', 'mockomatic' ); ?></h1>
+			<p>
+				<a href="<?php echo esc_url( $generate_url ); ?>"><?php esc_html_e( 'Go to Mockomatic Generator', 'mockomatic' ); ?></a>
+			</p>
 			<form method="post" action="options.php">
 				<?php
 				settings_fields( 'mockomatic_settings_group' );
@@ -290,6 +280,7 @@ class Admin {
 		if ( ! current_user_can( 'edit_posts' ) ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'mockomatic' ) );
 		}
+		$settings_url = admin_url( 'options-general.php?page=mockomatic-settings' );
 
 		?>
 		<div class="wrap mockomatic-wrap">
@@ -319,7 +310,7 @@ class Admin {
 			MOCKOMATIC_VERSION
 		);
 
-		if ( 'toplevel_page_mockomatic-generate' === $hook ) {
+		if ( in_array( $hook, [ 'tools_page_mockomatic-generate', 'toplevel_page_mockomatic-generate' ], true ) ) {
 			$asset_path = MOCKOMATIC_DIR . 'assets/admin/js/mockomatic-generate.asset.php';
 			$asset_data = [
 				'dependencies' => [],

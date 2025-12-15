@@ -67,6 +67,7 @@ abstract class API {
 	 */
 	protected function request( $url, $config ) {
 		$default = [
+			'method'  => 'POST',
 			'timeout' => 300,
 			'headers' => [
 				'Content-Type' => 'application/json',
@@ -76,7 +77,7 @@ abstract class API {
 		$config = wp_parse_args( $config, $default );
 
 		$start   = microtime( true );
-		$result  = wp_remote_post( $url, $config );
+		$result  = wp_remote_request( $url, $config );
 		$elapsed = microtime( true ) - $start;
 
 		$this->response_timer = (int) round( $elapsed * 1000 );
