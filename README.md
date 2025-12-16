@@ -68,6 +68,8 @@ Mockomatic is a free WordPress plugin that auto-builds believable demo sites wit
 
 ## Screenshots & Demo
 
+Demo site: https://mockomatic-demo.wp-autoplugin.com/ (plain WordPress install with only Mockomatic installed and run once)
+
 <details open>
 <summary>Generate demo content inside wp-admin</summary>
 <img src="assets/screenshot-1.png" alt="Generate demo content inside wp-admin" />
