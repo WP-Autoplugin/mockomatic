@@ -99,7 +99,6 @@ Demo site: https://mockomatic-demo.wp-autoplugin.com/ (plain WordPress install w
 - WordPress 6.0+
 - PHP 7.4+
 - API keys for any providers you plan to use (OpenAI, Google Gemini, Replicate)
-- Media uploads enabled if you plan to generate featured images
 
 ## Supported AI Models
 
@@ -109,7 +108,7 @@ Demo site: https://mockomatic-demo.wp-autoplugin.com/ (plain WordPress install w
 
 ## Contributing
 
-Pull requests and issues are welcome. Please follow WordPress coding standards and keep admin UX native and minimal.
+Pull requests and issues are welcome. Please follow WordPress coding standards.
 
 ## License
 
